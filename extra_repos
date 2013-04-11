@@ -1,0 +1,17 @@
+
+## DEBIAN
+## Assuming "main" repositories have already been added
+## by the Debian netinstall, and best mirror chosen.
+deb http://ftp.debian.org/debian/ wheezy contrib non-free
+#deb-src http://ftp.debian.org/debian/ wheezy contrib non-free
+
+## DEBIAN SECURITY
+## Assuming "main" repositories have already been added
+## by the Debian netinstall.
+deb http://security.debian.org/ wheezy/updates contrib non-free
+# deb-src http://security.debian.org/ wheezy/updates contrib non-free
+
+## CRUNCHBANG
+## Compatible with Debian Wheezy, but use at your own risk.
+deb http://packages.crunchbang.org/waldorf waldorf main
+#deb-src http://packages.crunchbang.org/waldorf waldorf main

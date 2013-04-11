@@ -1,0 +1,23 @@
+# This file contains some configuration variables.
+# You may change these if you want, but they must be set,
+# and this file must be present.
+
+log_dir="$HOME/.cb-netinstall-logs" # place to store install logs and other data
+backup_dir="/backup/cb-netinstall" # replaced system files will be moved here
+backup_suffix="~cb-netinst-$(date +%FT%T)~" # for backed-up files
+
+# files and directories which should be packaged with this script:
+necessary_files='sysfiles1 sysfiles2 greeting cb-netinstall-logs pkgs-manual'
+# extra_repos, apt-keys, postinstall_commands, pkgs-auto and pkgs-norecs might be needed too,
+# but this will be just a sanity check that we are in the right place.
+
+# Default behaviour is to add files in sysfiles1 & 2 to
+# the existing system directories.
+# If you want to completely replace any directories, list them here.
+# /etc/skel might be a candidate.
+# NB These directories will be removed from your system (but backed up)
+# so be careful.
+# (Space-separated list, quote if paths contain spaces, or "none".)
+# (replaced_dirs is an array)
+#replaced_dirs=("/etc/skel" )
+replaced_dirs=("none")
