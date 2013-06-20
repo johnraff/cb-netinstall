@@ -139,7 +139,7 @@ bigmsg "messages are being saved to $logfile"
 cp pkgs-manual pkgs-auto "$log_dir"
 
 # check debian version FIXME Is /etc/debian_version the best way?
-grep -q '\(wheezy\|7.0\)' /etc/debian_version && msg "Debian version: OK"|| { warnlog "/etc/debian_version reads: $(cat /etc/debian_version)"
+grep -q '\(wheezy\|\(^\|[^a-zA-Z0-9.]\)7\($\|[^a-zA-Z0-9]\)\)' /etc/debian_version && msg "Debian version: OK"|| { warnlog "/etc/debian_version reads: $(cat /etc/debian_version)"
     confirm "You do not appear to have Debian Wheezy installed.
 If you think this is incorrect,
 you may wish to continue with the installation,
