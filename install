@@ -302,15 +302,16 @@ Replaced files will be backed up to ${backup_dir}/etc/apt"
 # which to use.
 append_repos=false
 [[ -s extra_repos ]] && { # extra_repos is non-zero
-    if [[ -s sysfiles1/etc/apt/sources.list ]]
-    then
+    append_repos=true
+    [[ -s sysfiles1/etc/apt/sources.list ]] && {
         if are_identical /etc/apt/sources.list sysfiles1/etc/apt/sources.list
         then
             msg "/etc/apt/sources.list has already been modified."
-        elif [[ $(</etc/apt/sources.list) = *$(<extra_repos)* ]]
+            append_repos=false
+        elif [[ $(<sysfiles1/etc/apt/sources.list) = *$(<extra_repos)* ]]
         then
-            msg "extra_repos already appended to /etc/apt/sources.list"
-            mv sysfiles1/etc/apt/sources.list sysfiles1/etc/apt/sources.list~cb-orig2~ # preempt sysfiles1/etc/apt/sources.list from being copied into /etc again
+            msg "extra_repos already appended to sysfiles1/etc/apt/sources.list"
+            append_repos=false
         else
             echo "
 Your /etc/apt/sources.list file entries will be replaced by the
@@ -331,17 +332,15 @@ User chooses which to use."
             if [[ $REPLY = a ]]
             then
                 mv sysfiles1/etc/apt/sources.list sysfiles1/etc/apt/sources.list~cb-orig~
-                append_repos=true
                 log "User chose to append extra_repos to sources.list."
             else
                 log "User chose to replace sources.list."
+                append_repos=false
             fi
         fi
-    else
-        append_repos=true
-    fi
+    }
 }
-$append_repos && {
+[[ $append_repos = true ]] && {
     msg "adding extra repositories to existing sources.list file"
     sed '/deb-src/s/^/#/' /etc/apt/sources.list 2> >( tee -a "$logfile" ) > sysfiles1/etc/apt/sources.list || giveup "There was a problem editing sources.list." 1
     cat extra_repos 2> >( tee -a "$logfile" ) >> sysfiles1/etc/apt/sources.list || giveup "There was a problem appending extra_repos to sources.list." 1

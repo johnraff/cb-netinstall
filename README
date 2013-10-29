@@ -72,9 +72,9 @@ config: sets some directory paths etc
 cb-netinstall-logs: folder to copy into user's home directory
 
 (NOTE Of the two files extra_repos and sysfiles1/etc/apt/sources.list:
-If only extra_repos is present then those repositories will be added to 
+If only extra_repos is present then those repositories will be added to
 the /etc/apt/sources.list that was generated during the Debian Netinstall.
-If only sysfiles1/etc/apt/sources.list is present, that file will be 
+If only sysfiles1/etc/apt/sources.list is present, that file will be
 substituted for the current /etc/apt/sources.list.
 If both files are present, the user will be asked which one to use.
 This allows the user to keep the mirror that was set up during the install.)
@@ -95,25 +95,26 @@ Enter your own name and password as normal.
 You will then be given 'sudo' permissions,
 which will be needed in the script.
 
-2) At the "software selection" stage DESELECT EVERYTHING.
+2) At the "software selection" stage DESELECT EVERYTHING
+except "standard system utilities".
 You will have a core system only, on which
-the CrunchBang installer will add what is needed.
-(Use up/down arrows to move, spacebar to toggle selection.)
-If you are using the Expert Install,
-leave "standard system utilities" selected.
+the netinstall installer will add what is needed.
+(Some software items will be marked with an asterisk, indicating that
+they have been preselected. Use the spacebar to toggle selection and
+the up/down arrows to move.)
 
 The netinstall download and links to documentation can be found here:
-http://www.debian.org/devel/debian-installer/
+http://www.debian.org/CD/netinst/
 
 NOTE on WIRELESS
-Once the CrunchBang installation is complete, any Debian non-free 
+Once the CrunchBang installation is complete, any Debian non-free
 packages needed by your system will have been installed and wireless
-should work out of the box. However, the Debian Netinstall CD 
+should work out of the box. However, the Debian Netinstall CD
 does not contain any non-free software and the installation
-may have to be done using a wired net connection. This is preferred 
-in any case, as it is more stable, but if for some reason you are 
+may have to be done using a wired net connection. This is preferred
+in any case, as it is more stable, but if for some reason you are
 forced to install via wireless there are "unofficial" Debian netinstall
 images here:
 http://cdimage.debian.org/cdimage/unofficial/non-free/cd-including-firmware/
-These images include the non-free firmware needed for many 
+These images include the non-free firmware needed for many
 wireless cards to work.
