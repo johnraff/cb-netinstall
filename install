@@ -79,7 +79,7 @@ $1
 }
 
 giveup() { # $1 is message, $2 is desired return value: 0 or 1
-    if [[ $2 = 0 ]]
+    if [[ ${2:=1} = 0 ]]
     then
         bigmsg "$1"
     else
@@ -201,10 +201,10 @@ install_sysdir() { # recursively copy contents of $1 into $2, make backups in $3
     sudo mkdir -p "$3" > >( tee -a "$logfile" ) 2>&1 || giveup "Unable to make directory $3." 1
     for i in "$1"/*
     do
-        sudo test -e $i || break # $1 is empty
+        sudo test -e "$i" || break # $1 is empty
         filename="${i##*/}"
         target="${2%/}/${filename}" # avoid double slash if $2 is /
-        if sudo test -d $i
+        if sudo test -d "$i"
         then
             if sudo test -e "${target}"
             then
@@ -310,7 +310,7 @@ append_repos=false
         elif [[ $(</etc/apt/sources.list) = *$(<extra_repos)* ]]
         then
             msg "extra_repos already appended to /etc/apt/sources.list"
-            mv sysfiles1/etc/apt/sources.list sysfiles1/etc/apt/sources.list~cb-orig2~ # preempt sysfiles1/etc/apt/sources.list from being copied intp /etc again
+            mv sysfiles1/etc/apt/sources.list sysfiles1/etc/apt/sources.list~cb-orig2~ # preempt sysfiles1/etc/apt/sources.list from being copied into /etc again
         else
             echo "
 Your /etc/apt/sources.list file entries will be replaced by the
@@ -346,7 +346,7 @@ $append_repos && {
     sed '/deb-src/s/^/#/' /etc/apt/sources.list 2> >( tee -a "$logfile" ) > sysfiles1/etc/apt/sources.list || giveup "There was a problem editing sources.list." 1
     cat extra_repos 2> >( tee -a "$logfile" ) >> sysfiles1/etc/apt/sources.list || giveup "There was a problem appending extra_repos to sources.list." 1
 }
-[[ -s sysfiles1/etc/apt/sources.list ]] || giveup "There is no sources.list file."
+[[ -s sysfiles1/etc/apt/sources.list ]] || giveup "There is no sources.list file." 1
 
 msg "installing apt configuration files"
 
