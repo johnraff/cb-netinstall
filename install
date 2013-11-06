@@ -33,6 +33,9 @@ for i in log_dir backup_dir backup_suffix necessary_files replaced_dirs
 do
     [[ $i ]] || { echo "$0: Config variable $i has not been set." >&2; exit 1; }
 done
+install_backup_dir="${backup_dir}"/install
+snapshots_dir="${backup_dir}"/snapshots
+backup_dir="$install_backup_dir"
 
 logfile=error.log # temporary logfile in installer directory
 user=$USER
@@ -79,7 +82,7 @@ $1
 }
 
 giveup() { # $1 is message, $2 is desired return value: 0 or 1
-    if [[ ${2:=1} = 0 ]]
+    if [[ ${2:-1} = 0 ]]
     then
         bigmsg "$1"
     else
@@ -99,7 +102,7 @@ giveup() { # $1 is message, $2 is desired return value: 0 or 1
         done
     }
     echo "now exiting..."
-    exit $2
+    exit ${2:-1}
 }
 
 trap 'giveup "Script terminated." 1' 1 2 3 15
@@ -185,6 +188,19 @@ log "Packages originally auto-installed by the Debian netinstaller are recorded 
 msg "Installing rsync."
 sudo apt-get --quiet --yes install rsync > >( tee -a "$logfile" ) 2>&1 || giveup "Failed to install necessary package 'rsync'." 1
 
+[[ ${#snapshots[@]} -gt 0 ]] && {
+    bigmsg "Making snapshots of some files or directories"
+    for i in "${snapshots[@]}"
+    do
+        [[ $i ]] || continue # blank line
+        i="${i%/}" # remove any trailing slash
+        sudo test -e "${snapshots_dir}${i}" && { msg "snapshot of $i already made"; continue;}
+        msg "making snapshot of $i in ${snapshots_dir}"
+        sudo mkdir -p "${snapshots_dir}${i%/*}" > >( tee -a "$logfile" ) 2>&1 || errmsg "Failed to make directory ${snapshots_dir}${i%/*}"
+        sudo cp -a "$i" "${snapshots_dir}${i%/*}" > >( tee -a "$logfile" ) 2>&1 || errmsg "Failed to copy $i to ${snapshots_dir}${i%/*}."
+    done
+}
+
 ############ file copying functions ############
 # rsync would do almost the same, but this allows us to keep records and be picky about corner cases.
 
@@ -202,6 +218,9 @@ install_sysdir() { # recursively copy contents of $1 into $2, make backups in $3
     for i in "$1"/*
     do
         sudo test -e "$i" || break # $1 is empty
+        [[ $i = *$'\n'* ]] && giveup "Line-break in filename: $i
+Please contact the software provider, or remove this file
+before running the script again." 1
         filename="${i##*/}"
         target="${2%/}/${filename}" # avoid double slash if $2 is /
         if sudo test -d "$i"
@@ -213,7 +232,7 @@ install_sysdir() { # recursively copy contents of $1 into $2, make backups in $3
             else
                 msg "adding directory ${target}"
                 sudo rsync --dirs --perms "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                echo "\"${target}\"" >> "$log_dir"/sysdirs-added
+                echo "${target}" >> "$log_dir"/sysdirs-added
             fi
             install_sysdir "$i" "${target}" "$3/${filename}"
         else
@@ -238,12 +257,12 @@ install_sysdir() { # recursively copy contents of $1 into $2, make backups in $3
                         sudo mv "${target}" "$3/${filename}" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem moving ${target} to $3/${filename}." 1
                     fi
                     sudo cp --preserve=mode "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                    echo "\"${target}\"" >> "$log_dir"/sysfiles-replaced
+                    echo "${target}" >> "$log_dir"/sysfiles-replaced
                 fi
             else
                 msg "adding ${target}"
                 sudo cp --preserve=mode "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                echo "\"${target}\"" >> "$log_dir"/sysfiles-added
+                echo "${target}" >> "$log_dir"/sysfiles-added
             fi
         fi
     done
@@ -256,6 +275,9 @@ install_userdir() { # recursively copy contents of $1 into $2, make backups of r
     for i in "$1"/*
     do
         [[ -e $i ]] || break # $1 is empty
+        [[ $i = *$'\n'* ]] && giveup "Line-break in filename: $i
+Please contact the software provider, or remove this file
+before running the script again." 1
         filename="${i##*/}"
         if [[ -d $i ]]
         then
@@ -265,7 +287,7 @@ install_userdir() { # recursively copy contents of $1 into $2, make backups of r
             else
                 msg "adding directory $2/${filename}"
                 rsync --dirs --perms "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                echo "\"$2/${filename}\"" >> "$log_dir"/userdirs-added
+                echo "$2/${filename}" >> "$log_dir"/userdirs-added
             fi
             install_userdir "$i" "$2/${filename}"
         else
@@ -277,12 +299,12 @@ install_userdir() { # recursively copy contents of $1 into $2, make backups of r
                     # keep original backup, but try not to fill user's home with meaningless backup files
                     mv --no-clobber "$2/${filename}" "$2/${filename}${backup_suffix}" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem renaming $2/${filename} to $2/${filename}${backup_suffix}." 1
                     cp --preserve=mode "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                    echo "\"$2/${filename}\"" >> "$log_dir"/userfiles-replaced
+                    echo "$2/${filename}" >> "$log_dir"/userfiles-replaced
                 fi
             else
                 msg "adding $2/${filename}"
                 cp --preserve=mode "$i" "$2" > >( tee -a "$logfile" ) 2>&1 || giveup "There was a problem copying $i to $2." 1
-                echo "\"$2/${filename}\"" >> "$log_dir"/userfiles-added
+                echo "$2/${filename}" >> "$log_dir"/userfiles-added
             fi
         fi
     done

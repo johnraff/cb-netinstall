@@ -23,7 +23,7 @@ Debian Wheezy CORE SYSTEM ONLY.
 (See "Debian Netinstall Hints" below.)
 
 Attempts will be made to backup any data that might exist,
-but do not rely on it.
+but please do not rely on it.
 
 HOW TO USE
 
@@ -40,8 +40,8 @@ The installation process will start.
 Follow any prompts that appear on the screen.
 
 A folder called .cb-netinstall-logs will be added to your home folder.
-(The file ~/.cb-netinstall-logs/install.log will contain verbose information
-about the install process.)
+(The file ~/.cb-netinstall-logs/install.log will contain
+verbose information about the install process.)
 This folder may safely be removed if the installation was successful,
 and no issues arose subsequently.
 
@@ -100,8 +100,8 @@ except "standard system utilities".
 You will have a core system only, on which
 the netinstall installer will add what is needed.
 (Some software items will be marked with an asterisk, indicating that
-they have been preselected. Use the spacebar to toggle selection and
-the up/down arrows to move.)
+they have been preselected.
+Use the up/down arrows to move, and the spacebar to toggle selection.)
 
 The netinstall download and links to documentation can be found here:
 http://www.debian.org/CD/netinst/
