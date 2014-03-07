@@ -26,4 +26,5 @@ sudo update-gconf-defaults > >( tee -a "$logfile" ) 2>&1 || errmsg "failed to up
 # to pre-empt /usr/share/crunchbang/cb-user-setup
 [[ -w "$HOME/.gtk-bookmarks" ]] && sed --in-place "s/REPLACEME/$user/" $HOME/.gtk-bookmarks > >( tee -a "$logfile" ) 2>&1 || errmsg "failed to edit .gtk-bookmarks"
 [[ -e $HOME/images/wallpapers/shared ]] || ln -s /usr/share/backgrounds $HOME/images/wallpapers/shared > >( tee -a "$logfile" ) 2>&1 || errmsg "failed to add symlink to shared wallpapers"
+
 touch $HOME/.config/crunchbang/cb-setup > >( tee -a "$logfile" ) 2>&1 || errmsg "failed to touch .config/crunchbang/cb-setup"
