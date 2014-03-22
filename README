@@ -31,9 +31,9 @@ Boot into your Debian Netinstall cli system,
 log in and run these commands, as a normal user:
 (A fresh copy of this cb-netinstall package will be downloaded.)
 
-wget http://dl.dropbox.com/u/10808732/cb-netinstall.tar.gz
-tar -xpf cb-netinstall.tar.gz
-cd cb-netinstall
+wget https://github.com/johnraff/cb-netinstall/archive/master.tar.gz
+tar -xpf master.tar.gz
+cd cd-xfce-ja-netinstall-master
 ./install
 
 The installation process will start.
@@ -67,9 +67,11 @@ extra_repos: repository(ies) to add to /etc/apt/sources.list
 apt-keys: commands to install necessary APT GPG keys
 sysfiles1: system files to copy in before installing packages (mainly apt-related)
 sysfiles2: system files to copy in after installing packages
-postinstall_commands: commands to run after installing files and packages
+preinstall_commands: commands to run before installing packages and files
+postinstall_commands: commands to run after installing packages and files
 config: sets some directory paths etc
 cb-netinstall-logs: folder to copy into user's home directory
+undo: an experimental script to attempt to return the system to the state it was in before running the install script
 
 (NOTE Of the two files extra_repos and sysfiles1/etc/apt/sources.list:
 If only extra_repos is present then those repositories will be added to

@@ -31,7 +31,7 @@ set -o nounset # do not accept unset variables
 . config
 for i in log_dir backup_dir backup_suffix necessary_files replaced_dirs
 do
-    [[ $i ]] || { echo "$0: Config variable $i has not been set." >&2; exit 1; }
+    [[ $i ]] || { echo "$0: Config variable $i has not been set. Please check the \"config\" file." >&2; exit 1; }
 done
 install_backup_dir="${backup_dir}"/install
 snapshots_dir="${backup_dir}"/snapshots
@@ -76,9 +76,21 @@ confirm() { # $1 is message, $2 is desired return value: 0 or 1 (passed to 'give
     echo "
 $1
 (press enter to continue, any other key to exit)
-"
+" | tee -a "$logfile"
     read -srn1
     [[ $REPLY ]] && giveup "terminated by $user, goodbye!" $2
+    log "$user chose to continue"
+}
+
+option() {
+    echo "
+$1
+(press enter to agree, any other key to pass)
+" | tee -a "$logfile"
+    read -srn1
+    [[ $REPLY ]] && { log "$user did not agree"; return 1; }
+    log "$user agreed"
+    return 0
 }
 
 giveup() { # $1 is message, $2 is desired return value: 0 or 1
@@ -105,6 +117,22 @@ giveup() { # $1 is message, $2 is desired return value: 0 or 1
     exit ${2:-1}
 }
 
+net_test() {
+    tries=4
+    printf 'checking network connection... ' | tee -a "$logfile"
+    while [[ $tries -gt 0 ]]
+    do
+        wget -O - 'http://ftp.debian.org/debian/README' >/dev/null 2>&1 && {
+            msg '[OK]'
+            return 0
+        }
+        ((tries--))
+        sleep 1
+    done
+    msg '[FAILED]'
+    return 1
+}
+
 trap 'giveup "Script terminated." 1' 1 2 3 15
 [[ $user = root ]] && giveup "This script should be run by a normal user, not root" 1
 
@@ -125,6 +153,9 @@ installation of the Debian Wheezy CORE SYSTEM ONLY.
 "
 confirm "Would you like to start the install now?" 0
 
+net_test || giveup "You do not seem to have a working network connection.
+Please fix this issue and run the script again." 1
+
 # check for needed files
 missing_files=
 for i in $necessary_files
@@ -139,7 +170,7 @@ cat "$logfile" >> "$log_dir"/install.log
 rm "$logfile" # finished with temporary logfile
 logfile="$log_dir"/install.log # this logfile will remain after the install
 bigmsg "messages are being saved to $logfile"
-cp pkgs-manual pkgs-auto "$log_dir"
+cp -f pkgs-manual pkgs-norecs pkgs-auto config undo "$log_dir"
 
 # check debian version FIXME Is /etc/debian_version the best way?
 grep -q '\(wheezy\|\(^\|[^a-zA-Z0-9.]\)7\($\|[^a-zA-Z0-9]\)\)' /etc/debian_version && msg "Debian version: OK"|| { warnlog "/etc/debian_version reads: $(cat /etc/debian_version)"
@@ -164,6 +195,12 @@ Please enter it now and it will be stored for a while.
 sudo -v || giveup "You do not appear to have permission to use sudo,
 which is needed in this script.
 Please make the necessary adjustments to your system and try again." 1
+
+# initial tweaking
+bigmsg "Adjusting some system settings."
+[[ -r preinstall_commands ]] && {
+    . preinstall_commands
+}
 
 bigmsg "Upgrading system before install
 (this may take a little while)"
@@ -221,6 +258,7 @@ install_sysdir() { # recursively copy contents of $1 into $2, make backups in $3
         [[ $i = *$'\n'* ]] && giveup "Line-break in filename: $i
 Please contact the software provider, or remove this file
 before running the script again." 1
+        [[ $i = *~ ]] && { msg "ignoring backup file $i"; continue; }
         filename="${i##*/}"
         target="${2%/}/${filename}" # avoid double slash if $2 is /
         if sudo test -d "$i"
