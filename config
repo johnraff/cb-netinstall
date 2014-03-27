@@ -6,8 +6,8 @@ log_dir="$HOME/.cb-netinstall-logs" # place to store install logs and other data
 backup_dir="/backup/cb-netinstall" # replaced system files will be moved here
 backup_suffix="~cb-netinst-$(date +%FT%T)~" # for backed-up files
 
-# files and directories which must be packaged with this script:
-necessary_files='sysfiles1 sysfiles2 cb-netinstall-logs pkgs-manual pkgs-norecs pkgs-auto apt-keys extra_repos preinstall_commands postinstall_commands copyright README'
+# files and directories which must be packaged with this script (array):
+necessary_files=(sysfiles1 sysfiles2 cb-netinstall-logs pkgs-manual pkgs-norecs pkgs-auto apt-keys extra_repos preinstall_commands postinstall_commands copyright README)
 
 # Default behaviour is to add files in sysfiles1 & 2 to
 # the existing system directories.

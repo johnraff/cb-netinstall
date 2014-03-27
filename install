@@ -158,7 +158,7 @@ Please fix this issue and run the script again." 1
 
 # check for needed files
 missing_files=
-for i in $necessary_files
+for i in "${necessary_files[@]}"
 do
     [[ -r $i ]] || missing_files+=" $i"
 done
